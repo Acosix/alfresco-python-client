@@ -12,7 +12,7 @@ git clone git@github.com:Acosix/alfresco-python-client.git alfpyclient
 
 This project uses the following dependencies in addition to standard / built-in APIs:
 
-- [https://2.python-requests.org](requests)
+- [requests](https://2.python-requests.org)
 
 ## Usage / API
 
