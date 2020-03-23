@@ -148,3 +148,62 @@ for node in folderContents:
 # download content of node into provided file
 with open('path/to/' + anyNode.name, 'wb') as f:
     anyNode.downloadContent(f)
+
+
+
+# create a new node into folder and upload data
+from alfpyclient.common.errors import Conflict
+from alfpyclient.common.connections import connect
+...
+
+USER = "username"
+PASSWORD = "password"
+
+client = connect('<serverAddress>/alfresco', USER, PASSWORD)
+
+node_id = "4efc2abb-e12c-4995-b2e4-f2ff5ee022ae"  # folder uuid
+opUrl = "nodes/%s/children" % node_id
+try:
+    with open('<yourDocument>', 'rb') as file:
+        files = {'filedata': file}
+        payload={
+            "name": "The name of your document in Alfresco",
+            "nodeType": "cm:content",
+            "overwrite": "true",  # Allow versioning of your document
+            "cm:title": "Document title",
+            "cm:description": "Document description here",
+            },
+        node_data = client.multipartPost('alfresco', opUrl, payload=payload, files=files)
+        new_node_id = node_data.get('id')  # Get new node id
+except Conflict as err:
+    print("File already there! " + str(err.statusCode))
+
+
+
+# search something
+template = "%cm:title OR %cm:name OR %cm:description OR %d:content"  # could be also custom properties
+search_term = "<your search>"  # https://docs.alfresco.com/5.2/concepts/rm-searchsyntax-intro.html
+if workspace:  # if searching from a specific workspace
+    search_term += " AND ANCESTOR:\"%s\"" % workspace
+payload={
+        "query": {
+            "query": search_term
+            },
+        "include": ["properties"],  # to return additional informations
+        "fields": ["id", "name", "content", "properties"],  # to restrict the fields returned within a response
+        "filterQueries": [{"query": "TYPE:'cm:content'"}],  # return only results of type "cm:content"
+        "localization": {"locales": ["fr_BE", "en_GB"]},  # useless if your are working with multiple languages
+        "templates": [
+            {
+            "name": "TEXT",
+            "template": template  # using template for searching in some specific content/properties
+            }
+        ]}
+search_data = client.jsonPost('search', 'search', payload=payload)
+if search_data:
+    for entry in search_data['list']['entries']:
+        filename = entry['entry']['name']
+        node_id = entry['entry']['id']
+        properties = entry['entry'].get('properties')
+        if properties:
+            description = properties.get('cm:description')
