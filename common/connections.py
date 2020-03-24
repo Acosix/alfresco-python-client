@@ -20,7 +20,7 @@ class Client:
             basicStr = 'BASIC ' + b64encode(bytes(self.__ticket, 'utf-8')).decode('utf-8')
             self.__session.headers.update({'Authorization': basicStr})
 
-    def __processRequest(self, api: str, opUrl: str, version: str, params: Dict, headers: Dict, responseHandler: Callable[[Response], Any], errorHandler: Callable[[Response], Any], requestHandler: Callable[[str, Dict, Dict, Any], Any], payload: Any = None, files: Dict = None):
+    def __processRequest(self, api: str, opUrl: str, version: str, params: Dict, headers: Dict, responseHandler: Callable[[Response], Any], errorHandler: Callable[[Response], Any], requestHandler: Callable[[str, Dict, Dict, Dict, Any], Any], payload: Any = None, files: Dict = None):
         effectiveVersion = '1'
         if version is not None:
             effectiveVersion = version
@@ -55,26 +55,26 @@ class Client:
         with requestHandler(effectiveUrl, effectiveParams, effectiveHeaders, effectiveFiles, payload) as response:
             return self.__processResponse(response, responseHandler, errorHandler)
 
-    def __doGet(self, efUrl: str, efParams: Dict, efHeaders: Dict, payload: Any):
+    def __doGet(self, efUrl: str, efParams: Dict, efHeaders: Dict, efFiles: Dict,payload: Any):
         # ignore payload - should have been part of efParams
         return self.__session.get(efUrl, params=efParams, headers=efHeaders, stream=True)
 
-    def __doPost(self, efUrl: str, efParams: Dict, efHeaders: Dict, payload: Any):
+    def __doPost(self, efUrl: str, efParams: Dict, efHeaders: Dict, efFiles: Dict, payload: Any):
         return self.__session.post(efUrl, data=payload, params=efParams, headers=efHeaders, stream=True)
 
-    def __doJsonPost(self, efUrl: str, efParams: Dict, efHeaders: Dict, payload: Any):
+    def __doJsonPost(self, efUrl: str, efParams: Dict, efHeaders: Dict, efFiles: Dict, payload: Any):
         return self.__session.post(efUrl, json=payload, params=efParams, headers=efHeaders, stream=True)
 
     def __doMultipartPost(self, efUrl: str, efParams: Dict, efHeaders: Dict, efFiles: Dict, payload: Any):
         return self.__session.post(efUrl, headers=efHeaders, params=efParams, files=efFiles, data=payload)
 
-    def __doPut(self, efUrl: str, efParams: Dict, efHeaders: Dict, payload: Any):
+    def __doPut(self, efUrl: str, efParams: Dict, efHeaders: Dict, efFiles: Dict,payload: Any):
         return self.__session.put(efUrl, data=payload, params=efParams, headers=efHeaders, stream=True)
 
-    def __doJsonPut(self, efUrl: str, efParams: Dict, efHeaders: Dict, payload: Any):
+    def __doJsonPut(self, efUrl: str, efParams: Dict, efHeaders: Dict, efFiles: Dict,payload: Any):
         return self.__session.put(efUrl, json=payload, params=efParams, headers=efHeaders, stream=True)
 
-    def __doDelete(self, efUrl: str, efParams: Dict, efHeaders: Dict, payload: Any):
+    def __doDelete(self, efUrl: str, efParams: Dict, efHeaders: Dict, efFiles: Dict,payload: Any):
         # ignore payload - should have been part of efParams
         return self.__session.delete(efUrl, params=efParams, headers=efHeaders, stream=True)
 
